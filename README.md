@@ -1,72 +1,85 @@
 # Invoice Extraction Workbench
 
-A repeatable PDF-to-CSV workflow with a browser review interface, invoice line items and arithmetic reconciliation.
+Extract PDF invoice fields and line items into a detailed CSV, with a browser workspace for reviewing each source document and checking its totals.
 
-**[Open the interactive demo](https://enybyy.github.io/invoice-extraction-workbench/)** · [Download Windows package](Invoice_Extractor_Package.zip) · [Excel output](outputs/20261005-invoice/Invoice_Extraction.xlsx) · [CSV output](outputs/20261005-invoice/invoices.csv)
+**[Open the interactive workbench](https://enybyy.github.io/invoice-extraction-workbench/)** · [Windows package](Invoice_Extractor_Package.zip) · [Extracted CSV](outputs/public-invoices/invoices.csv)
 
-![Invoice source and extracted fields](assets/Workbench.png)
+![Five source PDFs and their extracted data](assets/Workbench.png)
 
-## Try it in the browser
+![Detailed invoice ledger and financial checks](assets/Dataset.png)
 
-Click **Process 10 sample PDFs**. The browser reads the actual PDFs using PDF.js and extracts their text with the supported layout rules. Select an invoice to compare its source with extracted fields and line items. **Export CSV** downloads the currently processed batch.
+## Explore the documents
 
-The ten sample invoices are fictional and cover three text layouts, two currencies, tax, shipping, discounts, a wrong total, a wrong line amount, a missing date and an image-only scan. Six reconcile, four require review. This is a demonstrable workflow, not validation against a customer's invoices.
+The gallery shows five PDF examples downloaded from their publishers: W3C UBL office supplies and construction invoices, Sliced Invoices services, DynamicPDF's two-page Northwind distribution invoice, and Flinders University's annotated supplier guide.
+
+Click **Extract all 5 PDFs**. PDF.js reads their actual pages; the extractor builds a five-record invoice table and a **39-row line-item table**. Search by supplier, customer, reference or description; filter line items by document; follow a row to its source page; expand terms and extraction notes. Download the combined dataset as CSV.
+
+These are public publisher examples, not past customer projects. Four copies replace contact/payment details while keeping the original layouts and invoice values. The Northwind example already uses fictional training data and remains unmodified. [sources.json](sources.json) records publisher URLs, changes and file hashes.
 
 ## Run on Windows
 
-1. Download and extract the package.
-2. Install Python 3.12+ from python.org with **Add Python to PATH**.
-3. Double-click `setup.cmd` once to create a virtual environment and install pypdf.
-4. Place PDF invoices in `inputs`.
-5. Double-click `run.cmd`. Open `output/invoices.csv` and the invoice review page.
-
-The package already includes the ten sample PDFs. Move these out of `inputs` before running a customer batch. Original PDFs are not changed.
+1. Extract the ZIP package.
+2. Install Python 3.12+ with **Add Python to PATH**.
+3. Double-click `setup.cmd` once.
+4. Place PDF files in `inputs`; move the five included examples out before processing your own batch.
+5. Double-click `run.cmd`. Open `output/invoices.csv` and `output/review.html`.
 
 ```sh
 python -m pip install -r requirements.txt
 python extract_invoices.py --input inputs --output output --mode local
 ```
 
-## AI extraction for varying layouts
+Original inputs stay unchanged. CSV uses UTF-8 with BOM for Excel compatibility. One row represents one line item, with a placeholder row when extraction fails so files are not silently dropped.
 
-The Python package includes an explicit `--mode ai` implementation using the OpenAI Responses API, PDF input and structured JSON output. Set `OPENAI_API_KEY` and `OPENAI_MODEL` in your environment, then run `run_ai.cmd`. The selected model must support PDF inputs and structured outputs.
+## What the dataset preserves
 
-AI mode sends PDFs to OpenAI, may incur API charges, and requires the user's confirmation in the launcher. Keys never belong in the browser or the repository. No live AI call has been validated in this project: accuracy, account access, model support and scanned-document quality must be checked against the actual source documents. The deterministic arithmetic checks run after either extraction mode.
+Supplier and customer; invoice reference and date; the original date string; due, order and shipment dates; purchase/sales orders; delivery reference; source page; SKU and item description; unit, quantity, price and printed line amount; tax, shipping, discount, printed total and reconciliation; payment terms, profile, review reasons and source notes.
 
-Documentation: [file inputs](https://developers.openai.com/api/docs/guides/file-inputs) and [structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
+Missing values remain empty. The Northwind source prints an order ID and order date, but no separately labelled invoice number, invoice date or currency: those are separate fields rather than invented invoice details. The university source contains placeholders and amount-only lines, so supplier, invoice date, quantity and unit price require review. A dollar sign is preserved as `$`, not guessed to mean a particular ISO currency. The UK construction profile maps its pound symbol to GBP.
 
-## Output and review
+Invoice totals repeat in CSV line-item rows. **Do not sum repeated invoice totals or aggregate different currencies.** Use the invoice-level JSON or the browser's invoice table for invoice-level review.
 
-- `invoices.csv`: one row per line item with vendor, invoice number, date, currency, quantities, prices, amounts, invoice-level adjustments and review reasons. An unreadable invoice gets one placeholder row so it is not silently dropped.
-- `results.json`: invoice-level structured records, original PDF filenames and SHA-256 file hashes.
-- `review.html`: a local overview of printed and calculated totals.
-- Published Excel: the captured sample batch, with invoice-level and line-item worksheets, filters and formulas. The batch Python script produces CSV/JSON/HTML; it does not regenerate the styled Excel.
+## Financial reconciliation
 
-Invoice totals repeat in the CSV for reference. **Do not sum repeated invoice totals across line-item rows.** Use one record per invoice or the Excel invoice sheet for invoice-level reporting. Never aggregate different currencies without a conversion policy.
+The extractor independently checks printed line amounts against quantity × unit price, and compares:
 
-Arithmetic uses Decimal in Python, rounded cents in the browser, and a 0.01 tolerance:
+`sum of printed line amounts + tax + shipping - discount = expected invoice total`
 
-`items sum + tax + shipping - discount = expected total`
+Tolerance is 0.01. Printed amounts are retained rather than corrected. In the construction example, the discount is calculated from its printed gross and post-discount totals; the printed VAT is retained because the source describes a settlement-discount tax basis.
 
-Printed line amounts are also compared with quantity × unit price. Printed values are kept, not silently corrected. Missing fields, unavailable text, unclear dates, duplicate vendor/invoice/date identifiers and processing errors remain in the review list. An invoice that reconciles can still have an incomplete extraction; review the vendor layout before relying on a batch.
+The public office-supplies PDF has line amounts totaling **497.50**, tax **47.95** and a printed total of **527.45**. The computed total is **545.45**, so the source produces a genuine **-18.00 difference**. The other four totals reconcile; incomplete metadata still requires review.
 
-## Scope
+## Extraction profiles and AI
 
-Local extraction handles the three included text layouts. Unknown vendors, multiline item descriptions, mixed tax treatment, credit notes and complex tables need tailored rules or validated AI extraction. PDFs are limited to 20 MB and 30 pages per file. Local mode has no OCR; image-only documents require AI vision or another OCR workflow. Encrypted PDFs require an unprotected copy. This package focuses on PDF invoices, not Word documents.
+Python and the browser share [public_profiles.json](public_profiles.json). Rules read text and parse layout-specific headers and tables; they do not load prefilled results as the extraction output. The published CSV/JSON are a separately captured batch. Legacy fixtures remain in `tests/fixtures`.
 
-## Related experience
+Local mode supports the five public profiles and three legacy text layouts. Unknown suppliers, complex tax treatments and image-only scans need additional rules, OCR or validated AI extraction. PDFs are limited to 20 MB and 30 pages each; encrypted documents require an unprotected copy.
 
-The earlier [Generar RH](https://github.com/Enybyy/rh-document-generator) project includes a Python PDF receipt extractor for series, date and total, alongside Excel-to-Word document generation. This workbench adds a separate line-item and reconciliation workflow.
+The optional `run_ai.cmd` uses the OpenAI Responses API with PDF inputs and structured output, followed by the same Python arithmetic checks. Set `OPENAI_API_KEY` and `OPENAI_MODEL` in your environment. The launcher asks before sending PDFs to OpenAI; API usage may incur charges. Never place keys in the browser or repository. Live AI extraction has not been validated with an API account or customer invoices.
+
+Official documentation: [file inputs](https://developers.openai.com/api/docs/guides/file-inputs), [structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
+
+## Sources
+
+- [W3C office-supplies example](https://www.w3.org/XML/Binary/2005/03/test-data/UBL-1.0/fs/Invoice/pdf/OfficeInvoice.Example-a4.pdf)
+- [W3C construction example](https://www.w3.org/XML/Binary/2005/03/test-data/UBL-1.0/fs/Invoice/pdf/JoineryInvoice.Example-a4.pdf)
+- [Sliced Invoices service example](https://slicedinvoices.com/pdf/wordpress-pdf-invoice-plugin-sample.pdf)
+- [DynamicPDF two-page Northwind example](https://www.dynamicpdf.com/Products/DynamicPDF/Examples/Web_CSharp/ReportWriterExamples/InvoiceExample.aspx)
+- [Flinders University supplier guide](https://staff.flinders.edu.au/content/dam/staff/finance/sample-inv-draft.pdf)
+
+Publisher documents and trademarks belong to their respective owners. These copies demonstrate extraction and do not represent affiliations or client engagements. PDF.js is included under Apache 2.0; see `vendor/PDFJS-LICENSE`.
 
 ## Verification
 
 ```sh
 python -m unittest discover -s tests -v
+node tests/test_browser.mjs
+node tests/test_public_browser.mjs
 ```
 
-Tests exercise actual PDF fixtures, currency number formats, reconciliation failures, missing values, duplicate preservation, malformed PDFs and AI configuration requirements. Browser checks cover sample processing, individual PDF uploads, PDF preview, review selection and CSV generation. The downloadable package was extracted and run in an independent folder. Passing fixture checks does not establish accuracy on unseen vendor layouts.
+Checks cover the five real downloaded PDFs, 39 items, both pages of the distribution source, original discrepancies, discount calculation, incomplete fields, duplicate preservation and malformed files. Browser-derived text is compared with the Python extraction for quantities, line amounts, identifiers, dates and totals. Passing these profiles does not establish accuracy on unseen vendor layouts.
 
-PDF.js is included under Apache 2.0; see `vendor/PDFJS-LICENSE`. Fictional vendor names do not represent client engagements.
+Earlier [Generar RH](https://github.com/Enybyy/rh-document-generator) work includes PDF receipt extraction for series, date and total alongside Excel-to-Word document generation.
 
 ---
 

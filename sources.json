@@ -1,0 +1,57 @@
+[
+  {
+    "file": "01_office_supply.pdf",
+    "title": "Office supplies",
+    "publisher": "W3C UBL examples",
+    "url": "https://www.w3.org/XML/Binary/2005/03/test-data/UBL-1.0/fs/Invoice/pdf/OfficeInvoice.Example-a4.pdf",
+    "pages": 1,
+    "thumbnail": "assets/documents/01_office_supply-1.png",
+    "original_sha256": "ad206b1ae40b2bf7596604adee1df7fb7c4ec6242e297d71888337eeff1cf691",
+    "sha256": "de2f3dc3e4923c726b13443d3ec02566d208cf25a2ad57b4fe775eb7f11d6961",
+    "modification": "Contact/payment details replaced; invoice values and layout preserved."
+  },
+  {
+    "file": "02_joinery.pdf",
+    "title": "Construction materials",
+    "publisher": "W3C UBL examples",
+    "url": "https://www.w3.org/XML/Binary/2005/03/test-data/UBL-1.0/fs/Invoice/pdf/JoineryInvoice.Example-a4.pdf",
+    "pages": 1,
+    "thumbnail": "assets/documents/02_joinery-1.png",
+    "original_sha256": "b56f7ab8b0afc36c93c870689a0981a55f7750297c38e2be60eafbb0223a2269",
+    "sha256": "29738e345aaa7979ffca8aba5e9b8a4004cff335567b9016f2df4a55ca6c84fd",
+    "modification": "Contact/payment details replaced; invoice values and layout preserved."
+  },
+  {
+    "file": "03_services.pdf",
+    "title": "Design services",
+    "publisher": "Sliced Invoices",
+    "url": "https://slicedinvoices.com/pdf/wordpress-pdf-invoice-plugin-sample.pdf",
+    "pages": 1,
+    "thumbnail": "assets/documents/03_services-1.png",
+    "original_sha256": "c2de358a0974f9b047aed8e457def7d4b1b39170f44819ec3152b42db787d72e",
+    "sha256": "bff02a29d56cb23762c20734f14ba04b51419ac4e49c8af4a5abc519591a613d",
+    "modification": "Contact/payment details replaced; invoice values and layout preserved."
+  },
+  {
+    "file": "04_distribution.pdf",
+    "title": "Distribution / two pages",
+    "publisher": "DynamicPDF / Northwind example",
+    "url": "https://www.dynamicpdf.com/Products/DynamicPDF/Examples/Web_CSharp/ReportWriterExamples/InvoiceExample.aspx",
+    "pages": 2,
+    "thumbnail": "assets/documents/04_distribution-1.png",
+    "original_sha256": "7c14b39e550b6e2406977768b49a9208220e6e5ab65cba025782d9caf269943c",
+    "sha256": "7c14b39e550b6e2406977768b49a9208220e6e5ab65cba025782d9caf269943c",
+    "modification": "Unmodified publisher's fictional Northwind example."
+  },
+  {
+    "file": "05_university.pdf",
+    "title": "Supplier invoice guide",
+    "publisher": "Flinders University",
+    "url": "https://staff.flinders.edu.au/content/dam/staff/finance/sample-inv-draft.pdf",
+    "pages": 1,
+    "thumbnail": "assets/documents/05_university-1.png",
+    "original_sha256": "e09ae866b30bccb2a497b6757c2c1ba924a325d06d7b0b6334571a0fd04adff6",
+    "sha256": "c606417bb15c0074ccd59a7e4e99bb995f010aa9495df2595191909de71ee71f",
+    "modification": "Contact/payment details replaced; invoice values and layout preserved."
+  }
+]

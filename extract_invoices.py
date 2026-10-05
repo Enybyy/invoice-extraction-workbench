@@ -4,10 +4,11 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from datetime import datetime
 import argparse, base64, csv, hashlib, html, json, os, re, sys, urllib.request
 from pypdf import PdfReader
+from public_extract import extract_public
 
 ROOT = Path(__file__).resolve().parent
 CENT = Decimal('0.01')
-FIELDS = ['source_file','vendor','invoice_number','date','currency','line_number','description','quantity','unit_price','line_amount','items_sum','tax','shipping','discount','expected_total','invoice_total','difference','review_required','review_reasons','extraction_method']
+FIELDS = ['source_file','source_page','vendor','customer','invoice_number','date','raw_date','order_date','due_date','purchase_order','sales_order','shipment_date','delivery_reference','customer_id','shipping_method','currency','line_number','sku','description','unit','quantity','unit_price','line_amount','printed_subtotal','items_sum','tax','shipping','discount','expected_total','invoice_total','difference','payment_terms','review_required','review_reasons','source_notes','source_profile','source_pages','extraction_method']
 
 def number(value):
     if value is None or value == '': return None
@@ -92,10 +93,10 @@ def validate(data, filename, method):
         try:
             out['date']=datetime.strptime(out['date'],'%Y-%m-%d').date().isoformat()
         except ValueError: reasons.append('Date needs an unambiguous YYYY-MM-DD value'); out['date']=''
-    if out['currency'] and not re.fullmatch('[A-Z]{3}',out['currency']): reasons.append('Invalid currency code')
+    if out['currency'] and not re.fullmatch('[A-Z]{3}',out['currency']): reasons.append('ISO currency code not printed' if out['currency']=='$' else 'Invalid currency code')
     items=[]
     for i,item in enumerate(data.get('items') or [],1):
-        row={'description':item.get('description') or ''}
+        row={k:item.get(k) or '' for k in ['description','sku','unit','line_reference','orientation','attributes','source_page']}
         if not row['description']: reasons.append(f'Line {i}: missing description')
         for key in ['quantity','unit_price','amount']:
             try: row[key]=number(item.get(key))
@@ -115,6 +116,8 @@ def validate(data, filename, method):
     expected=item_sum+amounts['tax']+amounts['shipping']-amounts['discount'] if item_sum is not None and all(amounts[k] is not None for k in ['tax','shipping','discount']) else None
     difference=(amounts['total']-expected).quantize(CENT,rounding=ROUND_HALF_UP) if expected is not None and amounts['total'] is not None else None
     if difference is not None and abs(difference)>CENT: reasons.append('Printed total differs from items + tax + shipping − discount')
+    out.update({k:data.get(k) or '' for k in ['customer','raw_date','order_date','due_date','purchase_order','sales_order','shipment_date','delivery_reference','customer_id','shipping_method','payment_terms','printed_subtotal','source_profile','currency_symbol']})
+    out['source_notes']='; '.join(data.get('source_notes') or [])
     out.update(source_file=filename,extraction_method=method,items=[{k:decimal_string(v) if isinstance(v,Decimal) else v for k,v in x.items()} for x in items],
         items_sum=decimal_string(item_sum),tax=decimal_string(amounts['tax']),shipping=decimal_string(amounts['shipping']),discount=decimal_string(amounts['discount']),
         expected_total=decimal_string(expected),invoice_total=decimal_string(amounts['total']),difference=decimal_string(difference),
@@ -127,12 +130,15 @@ def process_file(path, mode='local', model=''):
         reader=PdfReader(path)
         if reader.is_encrypted: raise ValueError('Encrypted PDF needs an unprotected copy')
         if len(reader.pages)>30: raise ValueError('PDF exceeds the 30-page limit')
+        layout='\f'.join('\n'.join(line.strip() for line in (page.extract_text(extraction_mode='layout') or '').splitlines() if line.strip()) for page in reader.pages)
+        public_data=extract_public(layout) if mode=='local' else None
         text='\n'.join(page.extract_text() or '' for page in reader.pages)
         if mode=='ai': data=ai_extract(path,model)
         else:
             if not text.strip(): raise ValueError('No PDF text: scan needs AI vision or OCR')
-            data=local_extract(text)
+            data=public_data or local_extract(text)
         out=validate(data,path.name,mode)
+        out['source_pages']=len(reader.pages)
     except Exception as e:
         # Do not print API exception bodies, secrets or customer document text.
         message=str(e) if isinstance(e,ValueError) else f'Processing error: {type(e).__name__}'
@@ -154,7 +160,7 @@ def csv_rows(records):
     for r in records:
         for index,line in enumerate(r['items'] or [{}],1):
             row={k:r.get(k,'') for k in FIELDS}
-            row.update(line_number=index if r['items'] else '',description=line.get('description',''),quantity=line.get('quantity',''),unit_price=line.get('unit_price',''),line_amount=line.get('amount',''))
+            row.update(line_number=index if r['items'] else '',source_page=line.get('source_page',''),sku=line.get('sku',''),unit=line.get('unit',''),description=line.get('description',''),quantity=line.get('quantity',''),unit_price=line.get('unit_price',''),line_amount=line.get('amount',''))
             row['review_required']='YES' if r['review_required'] else 'NO'
             for key,val in row.items():
                 if isinstance(val,str) and val[:1] in '=+-@' and key not in ['quantity','unit_price','line_amount','difference','tax','shipping','discount','invoice_total','expected_total','items_sum']: row[key]="'"+val

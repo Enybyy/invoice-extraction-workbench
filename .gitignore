@@ -4,6 +4,10 @@ __pycache__/
 output/
 .env
 *.log
+tmp/
+prepare_public_samples.py
+inputs/*.txt
+workbench.html
 *.inspect.ndjson
 build_excel.mjs
 make_samples.py
