@@ -1,0 +1,15 @@
+node_modules/
+.venv/
+__pycache__/
+output/
+.env
+*.log
+*.inspect.ndjson
+build_excel.mjs
+make_samples.py
+package_project.py
+Proposal.txt
+assets/0*.png
+assets/10_scanned.png
+assets/PDF_Fixtures_Contact.png
+outputs/*/Excel_*.png

@@ -1,0 +1,92 @@
+[
+  {
+    "source_file": "01_standard.pdf",
+    "vendor": "Harbor Supply",
+    "invoice_number": "HS-1001",
+    "date": "2026-10-01",
+    "currency": "USD",
+    "invoice_total": "68.00",
+    "review_required": false
+  },
+  {
+    "source_file": "02_with_tax.pdf",
+    "vendor": "Harbor Supply",
+    "invoice_number": "HS-1002",
+    "date": "2026-10-02",
+    "currency": "USD",
+    "invoice_total": "88.00",
+    "review_required": false
+  },
+  {
+    "source_file": "03_shipping.pdf",
+    "vendor": "Cedar Industrial",
+    "invoice_number": "CD-2040",
+    "date": "2026-10-02",
+    "currency": "USD",
+    "invoice_total": "115.00",
+    "review_required": false
+  },
+  {
+    "source_file": "04_discount.pdf",
+    "vendor": "Cedar Industrial",
+    "invoice_number": "CD-2041",
+    "date": "2026-10-03",
+    "currency": "USD",
+    "invoice_total": "130.00",
+    "review_required": false
+  },
+  {
+    "source_file": "05_decimal_comma.pdf",
+    "vendor": "Aster Wholesale",
+    "invoice_number": "AW-3001",
+    "date": "2026-10-03",
+    "currency": "EUR",
+    "invoice_total": "132.00",
+    "review_required": false
+  },
+  {
+    "source_file": "06_large_amount.pdf",
+    "vendor": "Aster Wholesale",
+    "invoice_number": "AW-3002",
+    "date": "2026-10-04",
+    "currency": "EUR",
+    "invoice_total": "1715.00",
+    "review_required": false
+  },
+  {
+    "source_file": "07_total_mismatch.pdf",
+    "vendor": "Harbor Supply",
+    "invoice_number": "HS-1003",
+    "date": "2026-10-04",
+    "currency": "USD",
+    "invoice_total": "75.00",
+    "review_required": true
+  },
+  {
+    "source_file": "08_line_mismatch.pdf",
+    "vendor": "Cedar Industrial",
+    "invoice_number": "CD-2042",
+    "date": "2026-10-04",
+    "currency": "USD",
+    "invoice_total": "110.00",
+    "review_required": true
+  },
+  {
+    "source_file": "09_missing_date.pdf",
+    "vendor": "Aster Wholesale",
+    "invoice_number": "AW-3003",
+    "date": "",
+    "currency": "EUR",
+    "invoice_total": "110.00",
+    "review_required": true
+  },
+  {
+    "source_file": "10_scanned.pdf",
+    "vendor": "Harbor Supply",
+    "invoice_number": "HS-1004",
+    "date": "2026-10-04",
+    "currency": "USD",
+    "invoice_total": "50.00",
+    "review_required": true
+  }
+]
