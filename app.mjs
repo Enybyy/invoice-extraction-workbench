@@ -11,7 +11,7 @@ async function readPDF(bytes,name){
 }
 async function process(files){
  $('samples').disabled=true;$('files').disabled=true;$('export').disabled=true;$('csv-ready').hidden=true;records=[];
- try{for(const [i,file]of files.entries()){$('progress').textContent=`Reading PDF ${i+1} of ${files.length}…`;try{const bytes=file.bytes||new Uint8Array(await file.arrayBuffer());if(bytes.length>20*1024*1024)throw new Error('File exceeds 20 MB');const {doc,text}=await readPDF(bytes,file.name);records.push({...parseInvoice(text,file.name),doc,bytes});}catch(e){records.push({source_file:file.name,vendor:'',invoice_number:'',date:'',currency:'',items:[],review_required:true,review_reasons:['PDF could not be read: '+e.message]});}}
+ try{for(const [i,file]of files.entries()){$('progress').textContent=`Reading PDF ${i+1} of ${files.length}…`;try{const bytes=file.bytes instanceof Uint8Array?file.bytes:new Uint8Array(await file.arrayBuffer());if(bytes.length>20*1024*1024)throw new Error('File exceeds 20 MB');const {doc,text}=await readPDF(bytes,file.name);records.push({...parseInvoice(text,file.name),doc,bytes});}catch(e){records.push({source_file:file.name,vendor:'',invoice_number:'',date:'',currency:'',items:[],review_required:true,review_reasons:['PDF could not be read: '+e.message]});}}
  markDuplicates(records);const count=records.filter(x=>x.review_required).length;$('progress').textContent=`${records.length} invoices · ${count} need review`;$('filter').value='all';list();if(records.length)await select(0);$('export').disabled=!records.length;
  }finally{$('samples').disabled=false;$('files').disabled=false;}
 }

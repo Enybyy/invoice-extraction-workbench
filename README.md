@@ -64,7 +64,7 @@ The earlier [Generar RH](https://github.com/Enybyy/rh-document-generator) projec
 python -m unittest discover -s tests -v
 ```
 
-Tests exercise actual PDF fixtures, currency number formats, reconciliation failures, missing values, duplicate preservation, malformed PDFs and AI configuration requirements. Browser checks cover sample processing, PDF preview, review selection and CSV generation. Passing fixture checks does not establish accuracy on unseen vendor layouts.
+Tests exercise actual PDF fixtures, currency number formats, reconciliation failures, missing values, duplicate preservation, malformed PDFs and AI configuration requirements. Browser checks cover sample processing, individual PDF uploads, PDF preview, review selection and CSV generation. The downloadable package was extracted and run in an independent folder. Passing fixture checks does not establish accuracy on unseen vendor layouts.
 
 PDF.js is included under Apache 2.0; see `vendor/PDFJS-LICENSE`. Fictional vendor names do not represent client engagements.
 
