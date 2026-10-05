@@ -83,5 +83,5 @@ $('search').addEventListener('input',tables);$('line-filter').addEventListener('
 $('export').addEventListener('click',()=>{const link=$('csv-ready');if(link.href.startsWith('blob:'))URL.revokeObjectURL(link.href);link.href=URL.createObjectURL(new Blob([toCSV(records)],{type:'text/csv;charset=utf-8'}));link.hidden=false;link.click();});
 try{
  [manifest,profiles]=await Promise.all(['sources.json','public_profiles.json'].map(async path=>{const response=await fetch(path);if(!response.ok)throw new Error('Could not load '+path);return response.json();}));
- documents=manifest.map(source=>({source}));gallery();$('source-links').innerHTML=manifest.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.publisher)}: ${esc(s.title)}</a>`).join('');await select(0);
+ documents=manifest.map(source=>({source}));gallery();$('extract').disabled=false;$('source-links').innerHTML=manifest.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.publisher)}: ${esc(s.title)}</a>`).join('');await select(0);
 }catch(e){$('preview-empty').textContent=e.message;$('progress').textContent='Load the published site or serve this folder through a local web server.';}
